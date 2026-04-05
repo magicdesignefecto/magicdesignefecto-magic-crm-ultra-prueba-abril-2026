@@ -6,6 +6,22 @@ export const PipelineModule = {
 
     render: async () => {
         const pageContent = `
+            <style>
+                @media (max-width: 768px) {
+                    #pipelineContainer {
+                        scroll-snap-type: x mandatory;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    .kanban-column {
+                        min-width: 85vw !important;
+                        scroll-snap-align: start;
+                    }
+                    .page-header .pipeline-search-wrap {
+                        width: 100%;
+                    }
+                }
+            </style>
+
             <div class="page-header" style="margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 15px;">
                     <div>
@@ -13,9 +29,9 @@ export const PipelineModule = {
                         <p style="color: var(--text-muted); font-size: 0.9rem;">Arrastra tus oportunidades para avanzar</p>
                     </div>
                     
-                    <div style="position: relative;">
+                    <div class="pipeline-search-wrap" style="position: relative;">
                         <input type="text" id="pipelineSearch" placeholder="Buscar..." 
-                            style="padding: 10px 10px 10px 35px; border: 1px solid #E5E7EB; border-radius: 20px; width: 220px; outline: none;">
+                            style="padding: 10px 10px 10px 35px; border: 1px solid #E5E7EB; border-radius: 20px; width: 100%; max-width: 220px; outline: none;">
                         <span style="position: absolute; left: 12px; top: 10px; color: #9CA3AF;">🔍</span>
                     </div>
                 </div>
