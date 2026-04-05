@@ -13,15 +13,18 @@ export const Layout = {
         const fbUser = auth.currentUser;
         const storeUser = Store.getState().user;
 
-        // Prioridad: Firebase > Store > Default
-        const displayName = fbUser?.displayName || storeUser?.name || 'Usuario';
+        // Datos compartidos desde app.js (evita segundo getDoc)
+        const sharedData = window.__userDataCache;
 
-        // Usamos el rol cacheado o el default
-        const role = cachedUserData?.role || storeUser?.role || 'Usuario';
+        // Prioridad: Shared cache > Firebase > Store > Default
+        const displayName = sharedData?.name || fbUser?.displayName || storeUser?.name || 'Usuario';
+
+        // Usamos el rol del cache compartido, luego local, luego default
+        const role = sharedData?.role || cachedUserData?.role || storeUser?.role || 'Usuario';
         const email = fbUser?.email || '';
 
-        // Photo URL: Store > cached user data > Firebase Auth
-        const photoURL = storeUser?.photoURL || cachedUserData?.photoURL || fbUser?.photoURL || null;
+        // Photo URL: Shared > Store > cached > Firebase Auth
+        const photoURL = sharedData?.photoURL || storeUser?.photoURL || cachedUserData?.photoURL || fbUser?.photoURL || null;
 
         // Iniciales (fallback si no hay foto)
         const initials = displayName.substring(0, 2).toUpperCase();
@@ -118,30 +121,39 @@ export const Layout = {
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
 
-        // --- CARGAR DATOS DEL USUARIO DESDE FIRESTORE ---
+        // --- CARGAR DATOS DEL USUARIO (reusar cache compartido si existe) ---
         const fbUser = auth.currentUser;
         if (fbUser && !cachedUserData) {
-            try {
-                const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-                const userDoc = await getDoc(doc(db, "users", fbUser.uid));
-                if (userDoc.exists()) {
-                    cachedUserData = userDoc.data();
-                    // Actualizar el UI con los datos reales
-                    const nameEl = document.querySelector('.u-name');
-                    const roleEl = document.querySelector('.u-role');
-                    const avatarEl = document.querySelector('.user-avatar');
-                    if (nameEl) nameEl.innerText = cachedUserData.name || fbUser.displayName || 'Usuario';
-                    if (roleEl) roleEl.innerText = cachedUserData.role || 'Usuario';
-                    if (avatarEl) {
-                        if (cachedUserData.photoURL) {
-                            avatarEl.innerHTML = `<img src="${cachedUserData.photoURL}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-                        } else if (cachedUserData.name) {
-                            avatarEl.innerText = cachedUserData.name.substring(0, 2).toUpperCase();
-                        }
+            // Reusar datos del cache compartido (ya obtenidos por app.js)
+            if (window.__userDataCache) {
+                cachedUserData = window.__userDataCache;
+            } else {
+                // Fallback: solo si app.js no pudo compartir los datos
+                try {
+                    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    const userDoc = await getDoc(doc(db, "users", fbUser.uid));
+                    if (userDoc.exists()) {
+                        cachedUserData = userDoc.data();
+                    }
+                } catch (error) {
+                    console.warn("No se pudieron cargar datos del usuario:", error);
+                }
+            }
+
+            // Actualizar el UI con los datos reales (funciona para ambos caminos)
+            if (cachedUserData) {
+                const nameEl = document.querySelector('.u-name');
+                const roleEl = document.querySelector('.u-role');
+                const avatarEl = document.querySelector('.user-avatar');
+                if (nameEl) nameEl.innerText = cachedUserData.name || fbUser.displayName || 'Usuario';
+                if (roleEl) roleEl.innerText = cachedUserData.role || 'Usuario';
+                if (avatarEl) {
+                    if (cachedUserData.photoURL) {
+                        avatarEl.innerHTML = `<img src="${cachedUserData.photoURL}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                    } else if (cachedUserData.name) {
+                        avatarEl.innerText = cachedUserData.name.substring(0, 2).toUpperCase();
                     }
                 }
-            } catch (error) {
-                console.warn("No se pudieron cargar datos del usuario:", error);
             }
         }
 
