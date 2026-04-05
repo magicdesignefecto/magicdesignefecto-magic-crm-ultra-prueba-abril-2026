@@ -321,4 +321,16 @@
         box-shadow: none;
         background: transparent;
     }
+
+    .content-container {
+        padding: 12px;
+    }
+
+    .main-content {
+        padding: 12px;
+    }
+
+    .content-scroll-area {
+        padding-bottom: 20px;
+    }
 }
