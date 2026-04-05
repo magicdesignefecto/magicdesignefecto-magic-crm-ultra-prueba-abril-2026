@@ -78,7 +78,7 @@
 .modal-content {
     background: white;
     width: 90%;
-    max-width: 500px;
+    max-width: 620px;
     border-radius: var(--radius-md);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     /* --- CORRECCIÓN CLAVE PARA MÓVIL --- */
@@ -95,7 +95,7 @@
 }
 
 .modal-header {
-    padding: 15px 20px;
+    padding: 12px 18px;
     border-bottom: 1px solid var(--border-light);
     display: flex;
     justify-content: space-between;
@@ -103,11 +103,12 @@
     background-color: #F9FAFB;
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
+    flex-shrink: 0;
 }
 
 .modal-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--text-main);
     font-weight: 600;
 }
@@ -120,10 +121,134 @@
 .btn-close-modal:hover { color: var(--text-main); }
 
 .modal-body {
-    padding: 20px;
+    padding: 16px;
     /* --- CORRECCIÓN CLAVE PARA SCROLL --- */
     overflow-y: auto; /* Habilita el scroll si el contenido es largo */
     /* ----------------------------------- */
+}
+
+/* =============================================================
+   OPTIMIZACIÓN DE DENSIDAD — FORMULARIOS DENTRO DE MODALES
+   Solo afecta contenido dentro de .modal-body para no romper
+   estilos globales de páginas o componentes externos.
+   ============================================================= */
+
+/* --- 1. Compactar secciones de formulario --- */
+.modal-body .form-section {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+/* --- 2. Compactar grupos de inputs --- */
+.modal-body .input-group {
+    gap: 8px;
+}
+
+.modal-body .form-group {
+    margin-bottom: 8px;
+}
+
+/* Último form-group sin margen extra */
+.modal-body .form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* --- 3. Compactar inputs (solo dentro de modales) --- */
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+}
+
+.modal-body textarea {
+    padding: 8px 10px;
+}
+
+/* --- 4. Compactar labels y títulos de sección --- */
+.modal-body .section-title {
+    font-size: 0.82rem;
+    margin: 0 0 8px 0;
+}
+
+.modal-body .form-section-title {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+
+.modal-body .form-label {
+    font-size: 0.72rem;
+    margin-bottom: 3px;
+}
+
+.modal-body label {
+    font-size: 0.8rem;
+}
+
+/* --- 5. Layout 2 columnas CONTROLADO --- */
+/* Base: siempre 1 columna */
+.modal-body .form-row,
+.modal-body .input-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+/* Desktop: 2 columnas solo con clase .two-col */
+@media (min-width: 768px) {
+    .modal-body .form-row,
+    .modal-body .input-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+}
+
+/* --- 6. Total box más compacto --- */
+.modal-body .total-box {
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.modal-body .total-amount {
+    font-size: 1.5rem;
+}
+
+/* --- 7. Botones dentro de modales más compactos --- */
+.modal-body .btn-3d {
+    padding: 12px 20px;
+    font-size: 0.92rem;
+}
+
+/* --- 8. Dropdown de servicios más compacto --- */
+.modal-body .dropdown-trigger {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+}
+
+.modal-body .service-option {
+    padding: 6px 8px;
+}
+
+.modal-body .services-list-scroll {
+    max-height: 180px;
+}
+
+/* --- 9. Filas dinámicas más compactas --- */
+.modal-body .dyn-row {
+    margin-bottom: 4px;
+}
+
+/* --- 10. Finance preview compacto --- */
+.modal-body .finance-preview {
+    padding: 10px;
+    margin-top: 8px;
+}
+
+/* --- 11. Next step rows más compactas --- */
+.modal-body .next-step-row {
+    padding: 6px 10px;
+    margin-bottom: 4px;
 }
 
 /* --- Action Icon Buttons (touch-friendly) --- */
@@ -168,5 +293,50 @@
     }
     .actions-cell {
         gap: 10px;
+    }
+}
+
+/* --- STICKY FOOTER PARA MODALES CON FORMULARIOS LARGOS --- */
+.modal-sticky-actions {
+    position: sticky;
+    bottom: -16px;
+    margin: 10px -16px -16px -16px;
+    padding: 12px 16px 16px 16px;
+    background: var(--bg-card, white);
+    border-top: 1px solid var(--border-color, #E5E7EB);
+    z-index: 10;
+}
+
+/* --- MODAL FULLSCREEN EN MÓVIL --- */
+@media (max-width: 640px) {
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+    }
+
+    .modal-header {
+        border-radius: 0;
+        position: sticky;
+        top: 0;
+        z-index: 11;
+    }
+
+    .modal-body {
+        padding: 12px;
+    }
+
+    /* Móvil: forzar 1 columna */
+    .modal-body .form-row,
+    .modal-body .input-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-sticky-actions {
+        bottom: -12px;
+        margin: 8px -12px -12px -12px;
+        padding: 10px 12px 12px 12px;
     }
 }
