@@ -6,6 +6,10 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-
 // Login se importa directo (siempre se necesita al inicio)
 import { LoginModule } from './modules/login.js';
 
+// Cache compartido: app.js guarda los datos del usuario aquí
+// para que Layout.js los lea sin hacer otro getDoc
+window.__userDataCache = null;
+
 // Los demás módulos se cargan BAJO DEMANDA (lazy loading)
 const lazyModule = (importFn) => {
     let cached = null;
@@ -147,6 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add(`theme-${savedTheme}`);
     console.log("🎨 Tema aplicado:", savedTheme);
 
+    // ========== PRECARGA: Iniciar descarga de dashboard AHORA ==========
+    // No esperamos el resultado — solo iniciamos la descarga en background
+    // para que esté listo cuando auth complete
+    const _dashboardPreload = import('./modules/dashboard.js');
+
     AuthService.onAuthStateChanged(async (user) => {
         if (user) {
             console.log("✅ Usuario detectado:", user.email);
@@ -156,6 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
+
+                    // Compartir con Layout.js para evitar segundo getDoc
+                    window.__userDataCache = userData;
 
                     if (userData.status === 'pending') {
                         console.warn("⛔ Usuario PENDIENTE detectado.");
@@ -183,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             // Ahora sí cerrar sesión
                             await AuthService.logout();
+                            window.__userDataCache = null;
                             navigateTo('/login');
                             return;
                         }
@@ -203,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Cerramos sesión
                         await AuthService.logout();
+                        window.__userDataCache = null;
                         navigateTo('/login');
                         return;
                     }
@@ -220,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } else {
             console.log("⚠️ No hay sesión, redirigiendo a Login");
+            window.__userDataCache = null;
             const currentRoute = getCurrentRoute();
             if (currentRoute !== '/register') {
                 navigateTo('/login');
